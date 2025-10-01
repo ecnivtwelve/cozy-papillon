@@ -31,7 +31,7 @@ export const GradesView = () => {
   )
 
   useEffect(() => {
-    console.log('GradesView timeseries', timeseries)
+    // console.log('GradesView timeseries', timeseries)
   }, [timeseries])
 
   const allPeriods = useMemo(() => {
@@ -148,13 +148,9 @@ export const GradesView = () => {
         <PeriodSelector {...periodSelectorProps} />
       </TabTitle>
 
-      {1==2 && (
+      {subjects.length > 0 && (
         <GradesChart
-          subjects={
-            subjects
-              ? subjects.filter(subject => subject.title === selectedPeriod)
-              : []
-          }
+          subjects={subjects}
         />
       )}
 
