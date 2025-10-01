@@ -79,6 +79,7 @@ const GradesChart = ({ subjects }) => {
 
     const options = {
       responsive: true,
+      maintainAspectRatio: false,
       plugins: {
         legend: {
           labels: {
@@ -113,7 +114,7 @@ const GradesChart = ({ subjects }) => {
           padding: '16px'
         }}
       >
-        <Bar height={isMobile ? 150 : 70} data={data} options={options} />
+        <Bar height={300} data={data} options={options} />
       </div>
     )
   }
