@@ -139,7 +139,9 @@ const AppLayout = () => {
               <Typography variant="h5">{client.appMetadata.slug}</Typography>
             </BarCenter>
           )}
-          <Outlet />
+          <div>
+            <Outlet />
+          </div>
         </Content>
       </Main>
       <Alerter t={t} />
