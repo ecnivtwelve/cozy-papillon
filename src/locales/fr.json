@@ -44,6 +44,7 @@
     "title": "Notes",
     "dialogContext": "Informations",
     "date": "Date",
+    "gradeAverage": "Moyenne des notes",
     "valuesList": "Résultats et moyennes",
     "emptyList": {
       "title": "Aucune note disponible",
