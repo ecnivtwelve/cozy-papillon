@@ -1,4 +1,5 @@
 export const GetAverage = (grades = [], type = "student", scale = 20) => {
+  console.log(grades)
   if (!Array.isArray(grades) || grades.length === 0) return 0;
 
   const { weightedSum, totalWeight } = grades.reduce(
@@ -13,8 +14,8 @@ export const GetAverage = (grades = [], type = "student", scale = 20) => {
       if (!Number.isFinite(coef) || coef <= 0) {
         return acc;
       }
-
-      const normalized = (raw / (outOf || 1)) * scale;
+      
+      const normalized = (raw / outOf) * scale;
 
       acc.weightedSum += normalized * coef;
       acc.totalWeight += coef;
