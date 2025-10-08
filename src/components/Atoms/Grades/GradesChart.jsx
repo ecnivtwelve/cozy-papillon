@@ -17,6 +17,14 @@ import { useI18n } from 'cozy-ui/transpiled/react/providers/I18n'
 import { GetAverage } from 'src/format/getAverage'
 import Typography from 'cozy-ui/transpiled/react/Typography';
 
+import DropdownButton from 'cozy-ui/transpiled/react/DropdownButton'
+import Menu from 'cozy-ui/transpiled/react/Menu'
+import MenuItem from 'cozy-ui/transpiled/react/MenuItem'
+import List from 'cozy-ui/transpiled/react/List'
+import ListItemIcon from 'cozy-ui/transpiled/react/ListItemIcon'
+import ListItemText from 'cozy-ui/transpiled/react/ListItemText'
+import Divider from 'cozy-ui/transpiled/react/Divider'
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -38,10 +46,20 @@ const GradesChart = ({ subjects }) => {
   const { t } = useI18n()
   const { isMobile } = useBreakpoints()
 
+  const [currentSubject, setCurrentSubject] = React.useState(null)
+
   try {
+  const allGrades = useMemo(() => {
+    if (currentSubject) {
+      const subject = subjects.find(s => s.subject === currentSubject)
+      return subject ? subject.series : []
+    }
+
+    return subjects.flatMap(subject => subject.series)
+  }, [subjects, currentSubject])
+
   const avgHistory = useMemo(() => {
     // calculate average by removing each grade one by one
-    const allGrades = subjects.flatMap(subject => subject.series)
     const history = allGrades.map((_, index) => {
       const gradesCopy = [...allGrades]
       // remove all grades after index
@@ -53,13 +71,12 @@ const GradesChart = ({ subjects }) => {
     })
     console.log('Avg history:', history)
     return history
-  }, [subjects])
+  }, [allGrades, currentSubject])
 
   const avgDateHistory = useMemo(() => {
-    const allGrades = subjects.flatMap(subject => subject.series)
     const history = allGrades.map((grade) => new Date(grade.date))
     return history
-  }, [subjects])
+  }, [allGrades])
 
   const primaryColor = getComputedStyle(document.documentElement).getPropertyValue('--primaryColor').trim();
   const hintTextColor = getComputedStyle(document.documentElement).getPropertyValue('--hintTextColor').trim();
@@ -97,6 +114,30 @@ const GradesChart = ({ subjects }) => {
 
   console.log('Chart data:', data)
 
+  const allSubjects = useMemo(() => {
+    return subjects.map(subject => subject.subject)
+  }, [subjects])
+
+  useEffect(() => {
+    if(allGrades.indexOf(currentSubject) === -1) {
+      setCurrentSubject(null)
+    }
+  }, [subjects])
+
+  const [menuOpen, setMenuOpen] = React.useState(false)
+  const [anchorEl, setAnchorEl] = React.useState(null)
+  const ref = React.useRef(null)
+
+  const toggleMenu = (event) => {
+    setAnchorEl(event.currentTarget)
+    setMenuOpen(!menuOpen)
+  }
+
+  const closeMenu = () => {
+    setMenuOpen(false)
+    setAnchorEl(null)
+  }
+
   return (
     <div
       style={{
@@ -119,9 +160,58 @@ const GradesChart = ({ subjects }) => {
           marginLeft: isMobile ? '0px' : '8px',
         }}
       >
-        <Typography variant={isMobile ? "subtitle1" : "body1"} color='textSecondary'>
-          {t('Grades.gradeAverage')}
-        </Typography>
+        <DropdownButton
+          ref={ref}
+          aria-controls="simple-menu"
+          aria-haspopup="true"
+          onClick={toggleMenu}
+          variant={isMobile ? "subtitle1" : "body1"}
+          color='textSecondary'
+        >
+          {currentSubject ? getSubjectName(currentSubject).pretty : t('Grades.gradeAverage')}
+        </DropdownButton>
+
+        <Menu
+          open={menuOpen}
+          anchorEl={anchorEl}
+          getContentAnchorEl={null}
+          anchorOrigin={{
+            vertical: 'bottom',
+            horizontal: 'left'
+          }}
+          transformOrigin={{
+            vertical: 'top',
+            horizontal: 'left'
+          }}
+          keepMounted
+          onClose={closeMenu}
+        >
+          <MenuItem selected={currentSubject === null} onClick={() => {
+            setCurrentSubject(null)
+            closeMenu()
+          }}>
+            <ListItemText primary={t('Grades.gradeAverage')} />
+          </MenuItem>
+          <Divider className="u-mv-half" />
+          {allSubjects.map((subject, index) => (
+            <MenuItem
+              key={index}
+              selected={currentSubject === subject}
+              onClick={() => {
+                setCurrentSubject(subject)
+                closeMenu()
+              }}
+            >
+              <ListItemIcon>
+                <Typography variant='h4'>
+                  {getSubjectName(subject).emoji}
+                </Typography>
+              </ListItemIcon>
+              <ListItemText primary={truncateLabel(getSubjectName(subject).pretty, 20)} />
+            </MenuItem>
+          ))}
+        </Menu>
+
         <div
           style={{
             display: 'flex',
