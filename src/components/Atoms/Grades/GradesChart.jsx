@@ -7,6 +7,7 @@ import {
   Title,
   Tooltip,
   Legend,
+  Filler,
 } from 'chart.js';
 import React, { useEffect, useMemo } from 'react'
 import { Line } from 'react-chartjs-2';
@@ -30,6 +31,7 @@ ChartJS.register(
   LinearScale,
   PointElement,
   LineElement,
+  Filler,
   Title,
   Tooltip,
   Legend
@@ -93,7 +95,9 @@ const GradesChart = ({ subjects }) => {
         borderColor: primaryColor,
         pointBackgroundColor: primaryColor,
         borderWidth: 4,
-        tension: 0.5
+        tension: 0.5,
+        fill: true,
+        backgroundColor: primaryColor + '33', // 20% opacity
       },
       {
         label: 'Moyenne de la classe',
@@ -238,7 +242,36 @@ const GradesChart = ({ subjects }) => {
               legend: {
                 display: false
               },
-            }
+              tooltip: {
+                padding: 10,
+                cornerRadius: 8,
+                boxPadding: 6,
+                titleFont: {
+                  family: 'Inter',
+                },
+                bodyFont: {
+                  family: 'Inter',
+                },
+                callbacks: {
+                  title: function(context) {
+                    let x = context[0].parsed.x;
+                    return avgDateHistory[x].toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' });
+                  },
+                  label: function(context) {
+                    let title = context.dataset.label;
+                    return title;
+                  },
+                  afterLabel: function (context) {
+                    let label = context.parsed.y;
+                    return label.toFixed(2).trim() + "/20";
+                  },
+                }
+              }
+            },
+            interaction: {
+              intersect: false,
+              mode: 'index',
+            },
           }}
           height={200}
         />
